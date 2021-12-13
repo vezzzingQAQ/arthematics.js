@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../arthematics.js"></script>
+    <script>
+        window.onload=function(){
+            createCanvas(0,0,width,height);
+            draw(function(){
+                canvas.background(new Color(0,0,0,1));
+                canvas.noStroke();
+                let size=200;
+                for(let x=width/2-size;x<width/2+size;x+=8){
+                    for(let y=height/2-size;y<height/2+size;y+=8){
+                        canvas.fill(new Color(map(sin(x+y+T),-1,1,0,255),map(cos(x*y+T),-1,1,0,255),map(sin(x*y+T),-1,1,0,255),1));
+                        canvas.circle(x,y,2);
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
