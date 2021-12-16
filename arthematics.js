@@ -1,3 +1,129 @@
+/**
+ * arthematics.js
+ * author:vezzzing
+ * start at 2021.12.14
+ */
+
+/**
+ * 常规全局变量
+ */
+var canvasList=[];//画布列表
+var canvas;//如果只有一个画布,就以此命名
+var frameCount=0;//帧数
+var T=0;
+var width=window.innerWidth;
+var height=window.innerHeight;
+
+/**
+ * 常量
+ */
+const PI=Math.PI;
+
+/**
+ * canvas全局变量
+ */
+//绘图宏
+var noFill;
+var noStroke;
+var fill;
+var stroke;
+var strokeWidth;
+var background;
+//图形绘制
+var point;
+var rect;
+var rectCenter;
+var circle;
+var line;
+var text;
+//上层数学函数
+var draw2dFunction;
+
+//初始化canvas全局变量
+function _initFunctionValueE(canvas){
+    noFill=function(){canvas.noFill()};
+    noStroke=function(){canvas.noStroke()};
+    fill=function(colorObj){canvas.fill(colorObj)};
+    stroke=function(colorObj){canvas.stroke(colorObj)};
+    strokeWidth=function(lineWidth){canvas.strokeWidth(lineWidth)};
+    background=function(colorObj){canvas.background(colorObj)};
+
+    point=function(x,y){canvas.point(x,y)};
+    rect=function(x,y,width,height){arguments.length==3?canvas.rect(x,y,width):canvas.rect(x,y,width,height)};
+    rectCenter=function(x,y,width,height){arguments.length==3?canvas.rectCenter(x,y,width):canvas.rectCenter(x,y,width,height)};
+    circle=function(x,y,r){canvas.circle(x,y,r)};
+    line=function(x1,y1,x2,y2){canvas.line(x1,y1,x2,y2)};
+    text=function(words,x,y){canvas.text(words,x,y)};
+
+    draw2dFunction=function(draw2dFunctionObj){canvas.draw2dFunction(draw2dFunctionObj)};
+}
+
+/**
+ * 全局操作函数
+ */
+var createCanvas;
+var display;
+var sin;
+var cos;
+var abs;
+var random;
+
+var map;
+var scalev;
+
+createCanvas=function createCanvas(dom,x,y,width,height,argList){
+    let cs=new Canvas(dom,x,y,width,height,"m2m"+canvasList.length,argList);
+    //更新画布列表
+    canvasList.push(cs);
+    if(canvasList.length==1){
+        canvas=cs;
+        _initFunctionValueE(canvas);
+    }
+    return(cs);
+}
+display=function display(f){
+    setInterval(function(){
+        frameCount++;
+        T+=0.05;
+        f();
+    },50/3);
+}
+
+/**
+ * 数学函数
+ */
+sin=function sin(x){
+    return(Math.sin(x));
+}
+cos=function cos(x){
+    return(Math.cos(x));
+}
+abs=function abs(x){
+    return(Math.abs(x));
+}
+random=function random(from,to){
+    return(Math.random()*(Math.abs(from-to))+(to-from)/2);
+}
+/**
+ * 映射函数
+ */
+map=function map(p,fp,tp,fa,ta){
+    return((fa*p-fa*tp-ta*p+ta*fp)/(fp-tp));
+}
+scalev=function scalev(delta,from,to){
+    return(delta*to/from);
+}
+/**
+ * 类型判断函数
+ */
+function _isNumber(x){
+    var regPos = /^[0-9]+.?[0-9]*/; //判断是否是数字。
+    if(regPos.test(x)){
+        return(true);
+    }else{
+        return(false);
+    }
+}
 class AMError{
     constructor(type,dis){
         this.type=type;
@@ -8,7 +134,7 @@ class AMError{
     }
 }
 class Canvas{
-    constructor(x,y,width,height,id,argList/*携带的参数列表*/){
+    constructor(dom,x,y,width,height,id,argList/*携带的参数列表*/){
         this.x=x;
         this.y=y;
         this.width=width;
@@ -42,7 +168,7 @@ class Canvas{
         //newCanvas.style.border="1px solid rgb(100,100,100)";
         this.canvas=newCanvas;
         this.context=this.canvas.getContext("2d");
-        document.body.appendChild(newCanvas);
+        dom.appendChild(newCanvas);
     }
     /**
      * 基础函数
@@ -79,6 +205,17 @@ class Canvas{
         this.context.fill();
         this.context.stroke();
     }
+    rectCenter(x,y,width,height){
+        this.context.beginPath(); 
+        if(arguments.length==4){
+            this.context.rect(x-width/2,y-height/2,width,height);
+        }else if(arguments.length==3){
+            this.context.rect(x-width/2,y-width/2,width,width);
+        }
+        this.context.closePath();
+        this.context.fill();
+        this.context.stroke();
+    }
     circle(x,y,r){
         this.context.beginPath(); 
         this.context.arc(x,y,r,0,Math.PI*2,false);
@@ -108,7 +245,7 @@ class Canvas{
     /**
      * 上层建筑数学函数
      */
-    draw2dFunction_o(obj){
+    draw2dFunction(obj){
         let boundxl=this.width/2-obj.sizex;
         let boundxr=this.width/2+obj.sizex;
         let boundyt=this.height/2-obj.sizey;
@@ -119,20 +256,19 @@ class Canvas{
         let yt=obj.yt;
         let yb=obj.yb;
         //计算映射
-        let addAmountX=scalev(obj.padx,Math.abs(xr-xl),Math.abs(boundxr-boundxl));
-        let addAmountY=scalev(obj.pady,Math.abs(yb-yt),Math.abs(boundyb-boundyt));
+        let addAmountX=scalev(obj.deltaX,Math.abs(xr-xl),Math.abs(boundxr-boundxl));
+        let addAmountY=scalev(obj.deltaY,Math.abs(yb-yt),Math.abs(boundyb-boundyt));
         for(let ax=boundxl;ax<boundxr;ax+=addAmountX){
             for(let ay=boundyt;ay<boundyb;ay+=addAmountY){
                 let x=map(ax,boundxl,boundxr,xl,xr);
                 let y=map(ay,boundyt,boundyb,yt,yb);
                 let z=obj.f(x,y);
-                //canvas.background(new Color(0));
                 obj.colorf(x,y,z);
                 obj.shapef(ax,ay,z);
             }
         }
     }
-    draw2dFunction(sizex,sizey,func,colorf,shapef){
+    draw2dFunction_old(sizex,sizey,func,colorf,shapef){
         let boundxl=this.width/2-sizex;
         let boundxr=this.width/2+sizex;
         let boundyt=this.height/2-sizey;
@@ -192,7 +328,7 @@ class Canvas{
             this.style.backgroundColor="transparent";
         }
         for(let i in this.parameters){
-            if(isNumber(this.parameters[i])){//判断是数字:四舍五入}
+            if(_isNumber(this.parameters[i])){//判断是数字:四舍五入}
                 tag.innerHTML+=`${i}:${this.parameters[i].toFixed(2)}`+"<br>";
             }
         }
@@ -213,7 +349,7 @@ class Function2d{
         return(this.f(x,y));
     }
 }
-class Color{
+class RGBColor{
     constructor(p1,p2,p3,p4){
         if(arguments.length==4){
             this.r=p1;
@@ -241,64 +377,5 @@ class Color{
     }
     toStyle(){
         return(`rgba(${this.r},${this.g},${this.b},${this.a})`);
-    }
-}
-//全局变量
-window.canvasList=[];//画布列表
-window.frameCount=0;//帧数
-window.T=0;
-window.width=window.innerWidth;
-window.height=window.innerHeight;
-//全局函数
-function createCanvas(x,y,width,height,argList){
-    let cs=new Canvas(x,y,width,height,"m2m"+canvasList.length,argList);
-    //更新画布列表
-    canvasList.push(cs);
-    if(canvasList.length==1){
-        window.canvas=cs;
-    }
-    return(cs);
-}
-function draw(f){
-    setInterval(function(){
-        window.frameCount++;
-        window.T+=0.05;
-        f();
-    },50/3);
-}
-/**
- * 数学函数
- * sin,cos,tan,random,
- */
-function sin(x){
-    return(Math.sin(x));
-}
-function cos(x){
-    return(Math.cos(x));
-}
-function abs(x){
-    return(Math.abs(x));
-}
-function random(from,to){
-    return(Math.random()*(Math.abs(from-to))+(to-from)/2);
-}
-/**
- * 映射函数
- */
-function map(p,fp,tp,fa,ta){
-    return((fa*p-fa*tp-ta*p+ta*fp)/(fp-tp));
-}
-function scalev(delta,from,to){
-    return(delta*to/from);
-}
-/**
- * 类型判断函数
- */
-function isNumber(x){
-    var regPos = /^[0-9]+.?[0-9]*/; //判断是否是数字。
-    if(regPos.test(x)){
-        return(true);
-    }else{
-        return(false);
     }
 }

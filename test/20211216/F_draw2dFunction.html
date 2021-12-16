@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../../arthematics.js"></script>
+    <script>
+        window.onload=function(){
+            createCanvas(document.body,0,0,width,height);
+            display(function(){
+                noFill();
+                background(new RGBColor(0,0,0));
+                draw2dFunction({
+                    sizex:300,
+                    sizey:300,
+                    xl:-3,xr:3,deltaX:0.1,
+                    yt:-3,yb:3,deltaY:0.1,
+                    f:function(x,y){
+                        return(sin(x*y-T));
+                    },
+                    colorf:function(x,y,z){
+                        stroke(new RGBColor(map(z,-1,1,0,255),
+                        map(x,-2,2,0,255),
+                        map(y,-2,2,255,0),
+                        1));
+                    },
+                    shapef:function(x,y,z){
+                        let lineLen=6;
+                        strokeWidth(map(z,-1,1,0,40));
+                        rectCenter(x,y,map(z,-1,1,0,15));
+                    }
+                    }
+                );
+            });
+        }
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

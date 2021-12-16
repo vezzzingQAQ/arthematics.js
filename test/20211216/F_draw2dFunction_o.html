@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../../arthematics.js"></script>
+    <script>
+        window.onload=function(){
+            createCanvas(document.body,0,0,width,height);
+            draw(function(){
+                canvas.noFill();
+                canvas.background(new RGBColor(0,0,0));
+                canvas.draw2dFunction({
+                    sizex:400,
+                    sizey:400,
+                    xl:-5,xr:5,deltaX:0.2,
+                    yt:-5,yb:5,deltaY:0.2,
+                    f:function(x,y){
+                        return(sin(x*x+y*y-T));
+                    },
+                    colorf:function(x,y,z){
+                        canvas.stroke(new RGBColor(map(z,-1,1,0,255),
+                        map(x,-2,2,0,255),
+                        map(y,-2,2,255,0),
+                        0.5));
+                    },
+                    shapef:function(x,y,z){
+                        let lineLen=6;
+                        canvas.strokeWidth(map(z,-1,1,0,1));
+                        canvas.line(x+lineLen,y+lineLen,x+lineLen,y-lineLen);
+                        canvas.line(x+lineLen,y-lineLen,x-lineLen,y-lineLen);
+                        canvas.line(x-lineLen,y-lineLen,x-lineLen,y+lineLen);
+                        canvas.line(x-lineLen,y+lineLen,x+lineLen,y+lineLen);
+                    }
+                    }
+                );
+            });
+        }
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
