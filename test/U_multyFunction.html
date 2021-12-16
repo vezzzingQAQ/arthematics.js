@@ -20,9 +20,9 @@
     <script src="../arthematics.js"></script>
     <script>
         window.onload=function(){
-            for(let x=0;x<width;x+=width/7){
-                for(let y=0;y<height;y+=height/4){
-                    createCanvas(x,y,width/7+1,height/4+1,[
+            for(let x=0;x<width;x+=width/10){
+                for(let y=0;y<height;y+=height/6){
+                    createCanvas(x,y,width/10+1,height/6+1,[
                         {parameter:"x",value:x},
                         {parameter:"y",value:y},
                     ]);
@@ -33,7 +33,7 @@
                     canvasList[i].background(new Color(0,0,0,1));
                     canvasList[i].noStroke();
                     let size=50;
-                    let pad=5;
+                    let pad=10;
                     let boundxl=canvasList[i].width/2-size;
                     let boundxr=canvasList[i].width/2+size;
                     let boundyt=canvasList[i].height/2-size;
@@ -47,9 +47,12 @@
                             let canvas=canvasList[i];
                             let x=map(ax,boundxl,boundxr,xl,xr);
                             let y=map(ay,boundyt,boundyb,yt,yb);
-                            let z=sin(x*canvas.x+y*canvas.y+T);
+                            let z=sin(x*canvas.parameters.x+y*canvas.parameters.y+T);
                             //canvas.background(new Color(0));
-                            canvas.fill(new Color(map(z,-1,1,0,255),));
+                            canvas.fill(new Color(
+                                map(z,-1,1,0,255),
+                                map(x,boundxl,boundxr,220,0),
+                                map(y,boundyt,boundyb,255,0)));
                             canvas.circle(ax,ay,abs(z*4));
                         }
                     }

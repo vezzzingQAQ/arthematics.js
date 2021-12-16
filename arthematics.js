@@ -21,10 +21,11 @@ class Canvas{
         
         this.id=id;
         //参数列表赋值
+        this.parameters={};
         if(argList){
             try{
                 for(let i=0;i<argList.length;i++){
-                    this[argList[i].parameter]=argList[i].value;
+                    this.parameters[argList[i].parameter]=argList[i].value;
                 }
             }catch{
                 return(new AMError("参数列表赋值错误","参见:参数列表赋值"));
@@ -38,7 +39,7 @@ class Canvas{
         newCanvas.style.position="absolute";
         newCanvas.style.left=this.x+"px";
         newCanvas.style.top=this.y+"px";
-        newCanvas.style.border="1px solid rgb(100,100,100)";
+        //newCanvas.style.border="1px solid rgb(100,100,100)";
         this.canvas=newCanvas;
         this.context=this.canvas.getContext("2d");
         document.body.appendChild(newCanvas);
@@ -69,7 +70,11 @@ class Canvas{
     }
     rect(x,y,width,height){
         this.context.beginPath(); 
-        this.context.rect(x,y,width,height);
+        if(arguments.length==4){
+            this.context.rect(x,y,width,height);
+        }else if(arguments.length==3){
+            this.context.rect(x,y,width,width);
+        }
         this.context.closePath();
         this.context.fill();
         this.context.stroke();
@@ -103,14 +108,109 @@ class Canvas{
     /**
      * 上层建筑数学函数
      */
-    draw2dFunction(fromx,tox,fromy,toy,f,colorf){
-        this.context.scale()
+    draw2dFunction_o(obj){
+        let boundxl=this.width/2-obj.sizex;
+        let boundxr=this.width/2+obj.sizex;
+        let boundyt=this.height/2-obj.sizey;
+        let boundyb=this.height/2+obj.sizey;
+        //读取函数对象
+        let xl=obj.xl;
+        let xr=obj.xr;
+        let yt=obj.yt;
+        let yb=obj.yb;
+        //计算映射
+        let addAmountX=scalev(obj.padx,Math.abs(xr-xl),Math.abs(boundxr-boundxl));
+        let addAmountY=scalev(obj.pady,Math.abs(yb-yt),Math.abs(boundyb-boundyt));
+        for(let ax=boundxl;ax<boundxr;ax+=addAmountX){
+            for(let ay=boundyt;ay<boundyb;ay+=addAmountY){
+                let x=map(ax,boundxl,boundxr,xl,xr);
+                let y=map(ay,boundyt,boundyb,yt,yb);
+                let z=obj.f(x,y);
+                //canvas.background(new Color(0));
+                obj.colorf(x,y,z);
+                obj.shapef(ax,ay,z);
+            }
+        }
+    }
+    draw2dFunction(sizex,sizey,func,colorf,shapef){
+        let boundxl=this.width/2-sizex;
+        let boundxr=this.width/2+sizex;
+        let boundyt=this.height/2-sizey;
+        let boundyb=this.height/2+sizey;
+        //读取函数对象
+        let xl=func.xl;
+        let xr=func.xr;
+        let yt=func.yt;
+        let yb=func.yb;
+        //计算映射
+        let addAmountX=scalev(func.padx,Math.abs(xr-xl),Math.abs(boundxr-boundxl));
+        let addAmountY=scalev(func.pady,Math.abs(yb-yt),Math.abs(boundyb-boundyt));
+        for(let ax=boundxl;ax<boundxr;ax+=addAmountX){
+            for(let ay=boundyt;ay<boundyb;ay+=addAmountY){
+                let x=map(ax,boundxl,boundxr,xl,xr);
+                let y=map(ay,boundyt,boundyb,yt,yb);
+                let z=func.calculate(x,y);
+                //canvas.background(new Color(0));
+                colorf(x,y,z);
+                shapef(ax,ay,z);
+            }
+        }
     }
     /**
      * 实例函数
      */
     log(){
         console.log(this);
+    }
+    /**
+     * 显示函数
+     */
+    showParameters(color){
+        let tag=document.createElement("div");
+        let lineHiehgt=20;
+        //指定样式
+        tag.style.position="absolute";
+        tag.style.width=this.width+"px";
+        tag.style.height=this.height+"px";
+        tag.style.left=this.x+"px";
+        tag.style.top=this.y+"px";
+        tag.style.lineHeight=lineHiehgt+"px";
+        tag.style.color=color.toStyle();
+        tag.style.paddingTop=this.height/2-(Object.getOwnPropertyNames(this.parameters).length)*lineHiehgt/2+"px";
+        tag.style.textAlign="center";
+        tag.style.display="block";
+        tag.style.fontSize="10px";
+        tag.style.cursor="default";
+        tag.style.opacity="0";
+        //绑定事件
+        tag.onmouseenter=function(){
+            this.style.opacity="1";
+            this.style.backgroundColor="rgba(150,150,150,0.2)";
+        }
+        tag.onmouseleave=function(){
+            this.style.opacity="0";
+            this.style.backgroundColor="transparent";
+        }
+        for(let i in this.parameters){
+            if(isNumber(this.parameters[i])){//判断是数字:四舍五入}
+                tag.innerHTML+=`${i}:${this.parameters[i].toFixed(2)}`+"<br>";
+            }
+        }
+        this.canvas.parentNode.appendChild(tag);
+    }
+}
+class Function2d{
+    constructor(fromx,tox,padx,fromy,toy,pady,f){
+        this.xl=fromx;
+        this.xr=tox;
+        this.padx=padx;
+        this.yt=fromy;
+        this.yb=toy;
+        this.pady=pady;
+        this.f=f;
+    }
+    calculate(x,y){
+        return(this.f(x,y));
     }
 }
 class Color{
@@ -138,6 +238,9 @@ class Color{
         }else{
             return(new AMError("颜色初始化错误","参见:颜色初始化"));
         }
+    }
+    toStyle(){
+        return(`rgba(${this.r},${this.g},${this.b},${this.a})`);
     }
 }
 //全局变量
@@ -183,5 +286,19 @@ function random(from,to){
  * 映射函数
  */
 function map(p,fp,tp,fa,ta){
-    return(p*(ta-fa)/(tp-fp));
+    return((fa*p-fa*tp-ta*p+ta*fp)/(fp-tp));
+}
+function scalev(delta,from,to){
+    return(delta*to/from);
+}
+/**
+ * 类型判断函数
+ */
+function isNumber(x){
+    var regPos = /^[0-9]+.?[0-9]*/; //判断是否是数字。
+    if(regPos.test(x)){
+        return(true);
+    }else{
+        return(false);
+    }
 }
