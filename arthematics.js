@@ -23,6 +23,12 @@ const TWO_PI=Math.PI*2;
 const HALF_PI=Math.PI/2;
 
 /**
+ * 按钮
+ */
+const RGB=1//默认状态
+const HSV_RGB=2//允许HSV转换
+var colorMode=HSV_RGB;
+/**
  * canvas全局变量
  */
 //绘图宏
@@ -41,9 +47,12 @@ var line;
 var text;
 //上层数学函数
 var draw2dFunction;
-
+var draw1dFunction;
+//交互
+var mx=0;
+var my=0;
 //初始化canvas全局变量
-function _initFunctionValueE(canvas){
+function _initFunctionValueE(){
     noFill=function(){canvasList[currentCanvasIndex].noFill()};
     noStroke=function(){canvasList[currentCanvasIndex].noStroke()};
     fill=function(colorObj){canvasList[currentCanvasIndex].fill(colorObj)};
@@ -59,19 +68,31 @@ function _initFunctionValueE(canvas){
     text=function(words,x,y){canvasList[currentCanvasIndex].text(words,x,y)};
 
     draw2dFunction=function(draw2dFunctionObj){canvasList[currentCanvasIndex].draw2dFunction(draw2dFunctionObj)};
+    draw1dFunction=function(draw1dFunctionObj){canvasList[currentCanvasIndex].draw1dFunction(draw1dFunctionObj)};
 }
 
 /**
  * 全局操作函数
  */
-var createCanvas;
+var start;
 var loop;
+
+var createCanvas;
+
 var rgba;
+var hsva;
 
 var sin;
+var asin;
 var cos;
+var acos;
+var tan;
+var atan;
 var abs;
+
 var random;
+var int;
+var round;
 
 var map;
 var scalev;
@@ -82,7 +103,7 @@ createCanvas=function createCanvas(dom,x,y,width,height,argList){
     canvasList.push(cs);
     if(canvasList.length==1){
         canvas=cs;
-        _initFunctionValueE(canvas);
+        _initFunctionValueE();
     }
     return(cs);
 }
@@ -97,12 +118,25 @@ rgba=function rgba(p1,p2,p3,p4){
         return(new RGBColor(p1,p2,p3,p4));
     }
 }
-loop=function loop(f){
+hsva=function hsva(h,s,v,a){
+    if(arguments.length==3){
+        return(new HSVColor(h,s,v));
+    }else if(arguments.length==4){
+        return(new HSVColor(h,s,v,a));
+    }
+}
+/**
+ * 结构函数
+ */
+start=function start(f){
+    f();
+}
+loop=function loop(f,frameRate=1){
     setInterval(function(){
         frameCount++;
         T+=0.05;
         f();
-    },50/3);
+    },frameRate);
 }
 
 /**
@@ -111,11 +145,29 @@ loop=function loop(f){
 sin=function sin(x){
     return(Math.sin(x));
 }
+asin=function asin(x){
+    return(Math.asin(x));
+}
 cos=function cos(x){
     return(Math.cos(x));
 }
+acos=function acos(x){
+    return(Math.acos(x));
+}
+tan=function tan(x){
+    return(Math.tan(x));
+}
+atan=function atan(x){
+    return(Math.atan(x));
+}
 abs=function abs(x){
     return(Math.abs(x));
+}
+int=function int(x){
+    return(Math.floor(x));
+}
+round=function round(x,value){
+    return(x.toFixed(value));
 }
 random=function random(from,to){
     return(Math.random()*(Math.abs(from-to))+(to-from)/2);
@@ -183,6 +235,12 @@ class Canvas{//canvas画布类
             newCanvas.style.position="absolute";
             newCanvas.style.left=this.x+"px";
             newCanvas.style.top=this.y+"px";
+            {//事件绑定
+                newCanvas.onmousemove=function(event){
+                    mx=event.clientX;
+                    my=event.clientY;
+                }
+            }
             this.canvas=newCanvas;
             this.context=this.canvas.getContext("2d");
             dom.appendChild(newCanvas);
@@ -254,12 +312,12 @@ class Canvas{//canvas画布类
         this.context.stroke();
     }
     text(words,x,y){//绘制文本-文本,x,y
-        this.context.font='50px sans-serif';
+        this.context.font='14px sans-serif';
         this.context.fillText(words,x,y);
         this.context.strokeText(words,x,y);
     }
     /*上层数学函数*/
-    draw2dFunction(obj){//绘制二元函数-传入函数对象
+    draw2dFunction(obj){//绘制二【三】元函数-传入函数对象
         let boundxl=this.width/2-obj.sizex;
         let boundxr=this.width/2+obj.sizex;
         let boundyt=this.height/2-obj.sizey;
@@ -280,6 +338,23 @@ class Canvas{//canvas画布类
                 obj.colorf(x,y,z);
                 obj.shapef(ax,ay,z);
             }
+        }
+    }
+    draw1dFunction(obj){//绘制一【二】元函数-传入函数对象
+        let boundxl=this.width/2-obj.sizex;
+        let boundxr=this.width/2+obj.sizex;
+        //读取函数对象
+        let xl=obj.xl;
+        let xr=obj.xr;
+        //计算映射
+        let addAmountX=scalev(obj.deltaX,Math.abs(xr-xl),Math.abs(boundxr-boundxl));
+        for(let ax=boundxl;ax<boundxr;ax+=addAmountX){
+            let x=map(ax,boundxl,boundxr,xl,xr);
+            let y=obj.f(x);
+            obj.colorf(x,y);
+            this.context.translate(0,height/2);
+            obj.shapef(ax,y);
+            this.context.translate(0,-height/2);
         }
     }
     /*实例函数*/
@@ -352,16 +427,16 @@ class Point{//数学点类
         return(`(${this.x},${this.y})`);
     }
 }
-class Rect{//数学矩形类
+class Rect{//数学矩形类,默认中心创建
     constructor(x,y,width,height){
-        this.x=x;
-        this.y=y;
         this.width=width;
         if(arguments.length==3){
             this.height=width;
         }else if(arguments.length==4){
             this.height=height;
         }
+        this.y=y-this.height/2;
+        this.x=x-this.width/2;
     }
     display(){//绘制矩形
         canvasList[currentCanvasIndex].rect(this.x,this.y,this.width,this.height);
@@ -392,9 +467,12 @@ class Color{//color基类
             this.r=p1;
             this.g=p1;
             this.b=p1;
-            this.a=p1;
+            this.a=1;
         }else{
             return(new AMError("颜色初始化错误","参见:颜色初始化"));
+        }
+        if(colorMode==HSV_RGB){
+            this.toHSV();
         }
     }
     toStyle(){//打印输出
@@ -409,8 +487,62 @@ class Color{//color基类
         this.g=avg;
         this.b=avg;
     }
+    _ctoHSV(r,g,b){
+        let h,s,v;
+        r/=255;g/=255;b/=255;
+        let max=Math.max(r,g,b);
+        let min=Math.min(r,g,b);
+        if(max==r && g>=b){
+            h=60*((g-b)/(max-min));
+        }else if(max==r && g<b){
+            h=60*((g-b)/(max-min))+360;
+        }else if(max==g){
+            h=60*((b-r)/(max-min))+120;
+        }else{
+            h=60*((r-g)/(max-min))+240;
+        }
+        if(max==0){
+            s=0;
+        }else{
+            s=(max-min)/max;
+        }
+        v=max;
+        return({h:h,s:s,v:v});
+    }
+    _ctoRGB(h,s,v){
+        let h1=(Math.floor(h/60))%6;
+        let f=h/60-h1;
+        let p=v*(1-s);
+        let q=v*(1-f*s);
+        let t=v*(1-(1-f)*s);
+        let r,g,b;
+        if(h1==0){
+            r=v;g=t;b=p;
+        }else if(h1==1){
+            r=q;g=v;b=p;
+        }else if(h1==2){
+            r=p;g=v;b=t;
+        }else if(h1==3){
+            r=p;g=q;b=v;
+        }else if(h1==4){
+            r=t;g=p;b=v;
+        }else{
+            r=v;g=p;b=q;
+        }
+        return({r:r*255,g:g*255,b:b*255});
+    }
+    toRGB(){//转化为RGB
+        this.r=this._ctoRGB(this.h,this.s,this.v).r;
+        this.g=this._ctoRGB(this.h,this.s,this.v).g;
+        this.b=this._ctoRGB(this.h,this.s,this.v).b;
+    }
+    toHSV(){//转化为HSV
+        this.h=this._ctoHSV(this.r,this.g,this.b).h;
+        this.s=this._ctoHSV(this.r,this.g,this.b).s;
+        this.v=this._ctoHSV(this.r,this.g,this.b).v;
+    }
 }
-class RGBColor extends Color{//RGB颜色类
+class RGBColor extends Color{//RGBA颜色类-RGB:[0,255],A:[0,1]
     constructor(p1,p2,p3,p4){
         if(arguments.length==1){
             super(p1);
@@ -472,6 +604,54 @@ class RGBColor extends Color{//RGB颜色类
         }else{
             this.r=0;this.g=0;this.b=255;
         }
+        return(this);
+    }
+}
+class HSVColor extends Color{//HSBA颜色类-H:[0,360],S:[0,1],B:[0,1]
+    constructor(h,s,v,a){
+        let h1=(Math.floor(h/60))%6;
+        let f=h/60-h1;
+        let p=v*(1-s);
+        let q=v*(1-f*s);
+        let t=v*(1-(1-f)*s);
+        let r,g,b;
+        if(h1==0){
+            r=v;g=t;b=p;
+        }else if(h1==1){
+            r=q;g=v;b=p;
+        }else if(h1==2){
+            r=p;g=v;b=t;
+        }else if(h1==3){
+            r=p;g=q;b=v;
+        }else if(h1==4){
+            r=t;g=p;b=v;
+        }else{
+            r=v;g=p;b=q;
+        }
+        if(arguments.length==3){
+            super(r*255,g*255,b*255);
+        }else if(arguments.length==4){
+            super(r*255,g*255,b*255,a);
+        }
+    }
+    invertH(){//色相反色
+        this.h=360-this.h;
+        this.toRGB();
+        return(this);
+    }
+    add1H(h){//颜色加法,多余归顶-颜色H
+        if(this.h+h<360 && this.h+h>0){
+            this.h+=h;
+        }else{
+            if(this.h+h>360){this.h=360};
+            if(this.h+h<0){this.h=0};
+        }
+        this.toRGB();
+        return(this);
+    }
+    add2H(h){//颜色加法,多余折返-颜色H
+        this.h=(this.h+h)%360;
+        this.toRGB();
         return(this);
     }
 }

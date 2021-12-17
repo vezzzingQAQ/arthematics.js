@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../../arthematics.js"></script>
+    <script>
+        onload=function(){
+            start(function(){
+                createCanvas(document.body,0,0,width,height);
+            });
+            loop(function(){
+                background(rgba(0));
+                let xamount=map(mx,0,width,-1,1);
+                let yamount=map(my,0,height,-1,1);
+                fill(rgba(255));
+                noStroke();
+                text(`logic function`,40,40);
+                draw2dFunction({
+                    sizex:300,
+                    sizey:300,
+                    xl:-3,
+                    xr:3,
+                    deltaX:0.1,
+                    yt:-3,
+                    yb:3,
+                    deltaY:0.1,
+                    f:function(x,y){
+                        return(sin((x-mx/90)^(y-my/90)));
+                    },
+                    colorf:function(x,y,z){
+                        let ccolor=hsva(map(z,-1,1,0,360),1,1);
+                        ccolor.add2H(frameCount);
+                        fill(ccolor);
+                        ccolor.invertH();
+                        strokeWidth(map(z,1,-1,0,5));
+                        stroke(ccolor);
+                    },
+                    shapef:function(x,y,z){
+                        rectCenter(x,y,map(z,-1,1,0,10));
+                    }
+                    }
+                );
+            });
+        }
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
