@@ -1,0 +1,39 @@
+@bg_body:black;
+@bg_codeDiv:rgba(41, 41, 41, 0.6);
+
+@wd_codeDiv:40vw;
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background-color: @bg_body;
+    .codeDiv{
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: @wd_codeDiv;
+        height: 100vh;
+        background-color: @bg_codeDiv;
+        backdrop-filter: blur(2px);
+        overflow: hidden;
+        .codePlace{
+            resize: none;
+            width: @wd_codeDiv;
+            height: 100%;
+            color: white;
+        }
+    }
+    .displayDiv{
+        position: relative;
+        margin-left: @wd_codeDiv;
+        top: 0;
+        width: calc(100vw - @wd_codeDiv);
+        height: 100vh;
+    }
+}

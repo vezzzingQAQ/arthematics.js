@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>arthematics editor</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <!--codeMirror高亮-->
+    <script src="libs/codeMirror/codemirror.js"></script>
+    <link rel="stylesheet" type="text/css" href="libs/codeMirror/codemirror.css">
+    <link rel="stylesheet" type="text/css" href="libs/codeMirror/theme/dracula.css">
+    <script src="libs/codeMirror/mode/javascript.js"></script>
+    <!--arthematics.js-->
+    <script src="../arthematics.js"></script>
+    <script>
+        var runningCode;
+        //实现高亮
+        window.onload=function(){
+            var editor = CodeMirror.fromTextArea(document.getElementById("cmcode"),{
+                mode:"text/javascript",
+                //lineNumbers:true,
+                theme:"dracula",
+                scrollbarStyle:"null",
+                matchBrackets: true,
+            });
+            editor.setSize(document.querySelector(".codeDiv").offsetWidth+"px",document.querySelector(".codeDiv").offsetHeight+"px");
+            runningCode=editor.getValue();
+            eval(runningCode);
+            /*实现实时预览*/
+            document.querySelector(".codeDiv").onkeyup=function(){
+                editor.save();
+                runningCode=editor.getValue();
+                let currentOpDiv=document.querySelector(".displayDiv");
+                for(let i=0;i<currentOpDiv.childNodes.length;i++){
+                    currentOpDiv.removeChild(currentOpDiv.childNodes[i]);
+                }
+                reload();
+                try{
+                    eval(runningCode);
+                }catch{
+
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="codeDiv">
+        <textarea class="codePlace" id="cmcode">
+start(function(){//创建画布
+
+    createCanvas(document.querySelector(".displayDiv"),0,0,document.querySelector(".displayDiv").offsetWidth,document.querySelector(".displayDiv").offsetHeight);
+
+});
+
+loop(function(){//按一定间隔执行
+
+    //刷背景
+    noStroke();
+    background(rgba(0,0.4));
+    
+    //映射鼠标位置
+    let xamount=map(mx,0,width,5,-5);
+    let yamount=map(my,0,height,5,-5);
+    
+    //绘制文字
+    fill(rgba(255));
+    text(`f(x)=sin(x*${xamount}+y*${yamount}+T)`,30,35);
+
+    //画二元函数
+    draw2dFunction({
+
+        /*声明函数的一些条件*/
+        
+        sizex:300,//在画布上的宽度
+        sizey:300,//在画布上的高度
+        xl:-2.5,//左边界
+        xr:2.5,//右边界
+        deltaX:0.1,//X方向间距
+        yt:-2.5,//上边界
+        yb:2.5,//下边界
+        deltaY:0.1,//Y方向间距
+
+        /*声明函数表达式*/
+        f:function(x,y){
+            return(sin(x*xamount+y*yamount+T));
+        },
+
+        /*针对函数每个点的上色方式*/
+        colorf:function(x,y,z){
+            fill(rgba(map(z,-1,1,0,255),map(x,-2,2,255,0),map(y,-2,2,0,255),0.2));
+        },
+        
+        /*针对函数每个点的绘制方式*/
+        shapef:function(x,y,z){
+            rectCenter(x,y,map(z,-1,1,0,50));
+        }
+
+        }
+    );
+
+});
+        </textarea>
+    </div>
+    <div class="displayDiv">
+
+    </div>
+</body>
+</html>

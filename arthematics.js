@@ -12,8 +12,8 @@ var currentCanvasIndex=0;
 var canvas;//如果只有一个画布,就以此命名
 var frameCount=0;//帧数
 var T=0;//十分之一帧数
-var width=window.innerWidth;//窗口宽高
-var height=window.innerHeight;//窗口宽高
+var windowWidth=window.innerWidth;//窗口宽高
+var windowHeight=window.innerHeight;//窗口宽高
 
 /**
  * 常量
@@ -76,6 +76,9 @@ function _initFunctionValueE(){
  */
 var start;
 var loop;
+var reload;
+
+var loopTimer;//loop函数的timer对象
 
 var createCanvas;
 
@@ -97,7 +100,22 @@ var round;
 var map;
 var scalev;
 
-createCanvas=function createCanvas(dom,x,y,width,height,argList){
+reload=function(){
+    canvasList=[];//画布列表
+    currentCanvasIndex=0;
+    frameCount=0;//帧数
+    T=0;//十分之一帧数
+    windowWidth=window.innerWidth;//窗口宽高
+    windowHeight=window.innerHeight;//窗口宽高
+
+    colorMode=HSV_RGB;
+    try{
+        clearInterval(loopTimer);
+    }catch{
+
+    }
+}
+createCanvas=function(dom,x,y,width,height,argList){
     let cs=new Canvas(dom,x,y,width,height,"m2m"+canvasList.length,argList);
     //更新画布列表
     canvasList.push(cs);
@@ -105,9 +123,12 @@ createCanvas=function createCanvas(dom,x,y,width,height,argList){
         canvas=cs;
         _initFunctionValueE();
     }
+    //更新width,height;
+    window.width=width;
+    window.height=height;
     return(cs);
 }
-rgba=function rgba(p1,p2,p3,p4){
+rgba=function(p1,p2,p3,p4){
     if(arguments.length==1){
         return(new RGBColor(p1));
     }else if(arguments.length==2){
@@ -118,7 +139,7 @@ rgba=function rgba(p1,p2,p3,p4){
         return(new RGBColor(p1,p2,p3,p4));
     }
 }
-hsva=function hsva(h,s,v,a){
+hsva=function(h,s,v,a){
     if(arguments.length==3){
         return(new HSVColor(h,s,v));
     }else if(arguments.length==4){
@@ -128,11 +149,11 @@ hsva=function hsva(h,s,v,a){
 /**
  * 结构函数
  */
-start=function start(f){
+start=function(f){
     f();
 }
-loop=function loop(f,frameRate=1){
-    setInterval(function(){
+loop=function(f,frameRate=1){
+    loopTimer=setInterval(function(){
         frameCount++;
         T+=0.05;
         f();
@@ -142,43 +163,43 @@ loop=function loop(f,frameRate=1){
 /**
  * 数学函数
  */
-sin=function sin(x){
+sin=function(x){
     return(Math.sin(x));
 }
-asin=function asin(x){
+asin=function(x){
     return(Math.asin(x));
 }
-cos=function cos(x){
+cos=function(x){
     return(Math.cos(x));
 }
-acos=function acos(x){
+acos=function(x){
     return(Math.acos(x));
 }
-tan=function tan(x){
+tan=function(x){
     return(Math.tan(x));
 }
-atan=function atan(x){
+atan=function(x){
     return(Math.atan(x));
 }
-abs=function abs(x){
+abs=function(x){
     return(Math.abs(x));
 }
-int=function int(x){
+int=function(x){
     return(Math.floor(x));
 }
-round=function round(x,value){
+round=function(x,value){
     return(x.toFixed(value));
 }
-random=function random(from,to){
+random=function(from,to){
     return(Math.random()*(Math.abs(from-to))+(to-from)/2);
 }
 /**
  * 映射函数
  */
-map=function map(p,fp,tp,fa,ta){
+map=function(p,fp,tp,fa,ta){
     return((fa*p-fa*tp-ta*p+ta*fp)/(fp-tp));
 }
-scalev=function scalev(delta,from,to){
+scalev=function(delta,from,to){
     return(delta*to/from);
 }
 /**

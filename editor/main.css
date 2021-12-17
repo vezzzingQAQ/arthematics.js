@@ -1,0 +1,35 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: black;
+}
+body .codeDiv {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 40vw;
+  height: 100vh;
+  background-color: rgba(41, 41, 41, 0.6);
+  backdrop-filter: blur(2px);
+  overflow: hidden;
+}
+body .codeDiv .codePlace {
+  resize: none;
+  width: 40vw;
+  height: 100%;
+  color: white;
+}
+body .displayDiv {
+  position: relative;
+  margin-left: 40vw;
+  top: 0;
+  width: calc(100vw - 40vw);
+  height: 100vh;
+}
