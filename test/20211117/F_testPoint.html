@@ -30,18 +30,19 @@
                     xl:-3,xr:3,deltaX:0.1,
                     yt:-3,yb:3,deltaY:0.1,
                     f:function(x,y){
-                        return(sin(x*y+sin(x-T/2)+T));
+                        return(sin(x*y+sin(x-T/2)+random(0,0.2)+T));
                     },
                     colorf:function(x,y,z){
                         stroke(rgba(map(z,-1,1,0,255),
-                        map(x,-2,2,0,255),
+                        map(x,-2,2,255,0),
                         map(y,-2,2,255,0),
                         1));
+                        strokeWidth(map(z,-1,1,0,5));
                     },
                     shapef:function(x,y,z){
                         let lineLen=6;
-                        strokeWidth(map(z,-1,1,0,40));
-                        rectCenter(x,y,map(z,-1,1,0,15));
+                        let rect=new Rect(x,y,map(z,-1,1,0,5));
+                        rect.display();
                     }
                     }
                 );
