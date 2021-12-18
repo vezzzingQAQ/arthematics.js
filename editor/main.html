@@ -13,10 +13,12 @@
     <script src="libs/codeMirror/mode/javascript.js"></script>
     <!--arthematics.js-->
     <script src="../arthematics.js"></script>
+    <!--储存对象-->
+    <script src="store/store.js"></script>
     <script>
         var runningCode;
-        //实现高亮
         window.onload=function(){
+            //实现高亮
             var editor = CodeMirror.fromTextArea(document.getElementById("cmcode"),{
                 mode:"text/javascript",
                 //lineNumbers:true,
@@ -25,10 +27,39 @@
                 matchBrackets: true,
             });
             editor.setSize(document.querySelector(".codeDiv").offsetWidth+"px",document.querySelector(".codeDiv").offsetHeight+"px");
+            //加载储存对象
+            var codeList=stroge.displayList;
+            var displayCode=codeList[stroge.displayIndex];
+            //默认范例加载到editor
+            editor.setValue(displayCode.code);
+            //读取所有的项目显示到项目列表
+            let projectContainer=document.querySelector(".exampleDiv>ul");
+            for(let i=0;i<codeList.length;i++){
+                projectContainer.innerHTML+=`
+                <li id="${codeList[i].name}" class="exampleButton">
+                <span class="name">${codeList[i].name}</span>
+                <span class="author">by ${codeList[i].author}</span>
+                </li>
+                `
+            }
+            //点击项目列表切换显示的项目
+            projectContainer.onclick=function(e){
+                if(e.target.className=="exampleButton"){
+                    let projectName=e.target.id;
+                    for(let i=0;i<codeList.length;i++){
+                        if(projectName==codeList[i].name){
+                            editor.setValue(codeList[i].code);
+                            render();
+                            break;
+                        }
+                    }
+                }
+            }
+            //实时预览
             runningCode=editor.getValue();
             eval(runningCode);
-            /*实现实时预览*/
-            document.querySelector(".codeDiv").onkeyup=function(){
+            //实现实时预览
+            function render(){
                 editor.save();
                 runningCode=editor.getValue();
                 let currentOpDiv=document.querySelector(".displayDiv");
@@ -42,69 +73,31 @@
 
                 }
             }
+            //按键抬起自动更新
+            document.querySelector(".codeDiv").onkeyup=function(){
+                render();
+            }
         }
     </script>
 </head>
 <body>
+    <div class="infoDiv">
+        <p class="name"></p>
+        <p class="author"></p>
+        <p class="date"></p>
+        <div class="img"></div>
+    </div>
     <div class="codeDiv">
         <textarea class="codePlace" id="cmcode">
-start(function(){//创建画布
 
-    createCanvas(document.querySelector(".displayDiv"),0,0,document.querySelector(".displayDiv").offsetWidth,document.querySelector(".displayDiv").offsetHeight);
-
-});
-
-loop(function(){//按一定间隔执行
-
-    //刷背景
-    noStroke();
-    background(rgba(0,0.4));
-    
-    //映射鼠标位置
-    let xamount=map(mx,0,width,5,-5);
-    let yamount=map(my,0,height,5,-5);
-    
-    //绘制文字
-    fill(rgba(255));
-    text(`f(x)=sin(x*${xamount}+y*${yamount}+T)`,30,35);
-
-    //画二元函数
-    draw2dFunction({
-
-        /*声明函数的一些条件*/
-        
-        sizex:300,//在画布上的宽度
-        sizey:300,//在画布上的高度
-        xl:-2.5,//左边界
-        xr:2.5,//右边界
-        deltaX:0.1,//X方向间距
-        yt:-2.5,//上边界
-        yb:2.5,//下边界
-        deltaY:0.1,//Y方向间距
-
-        /*声明函数表达式*/
-        f:function(x,y){
-            return(sin(x*xamount+y*yamount+T));
-        },
-
-        /*针对函数每个点的上色方式*/
-        colorf:function(x,y,z){
-            fill(rgba(map(z,-1,1,0,255),map(x,-2,2,255,0),map(y,-2,2,0,255),0.2));
-        },
-        
-        /*针对函数每个点的绘制方式*/
-        shapef:function(x,y,z){
-            rectCenter(x,y,map(z,-1,1,0,50));
-        }
-
-        }
-    );
-
-});
         </textarea>
     </div>
     <div class="displayDiv">
 
+    </div>
+    <div class="exampleDiv">
+        <ul>
+        </ul>
     </div>
 </body>
 </html>

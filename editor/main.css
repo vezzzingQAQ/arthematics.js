@@ -10,15 +10,25 @@ body {
   position: relative;
   background-color: black;
 }
-body .codeDiv {
+body .infoDiv {
   position: fixed;
   left: 0;
   top: 0;
+  height: 100px;
   width: 40vw;
-  height: 100vh;
-  background-color: rgba(41, 41, 41, 0.6);
+  background-color: #202020;
+  z-index: 999;
+}
+body .codeDiv {
+  position: fixed;
+  left: 0;
+  top: 100px;
+  width: 40vw;
+  height: calc(100vh - 100px - 200px);
+  background-color: #1b1b1b;
   backdrop-filter: blur(2px);
   overflow: hidden;
+  z-index: 999;
 }
 body .codeDiv .codePlace {
   resize: none;
@@ -32,4 +42,47 @@ body .displayDiv {
   top: 0;
   width: calc(100vw - 40vw);
   height: 100vh;
+  z-index: 999;
+}
+body .exampleDiv {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 40vw;
+  height: 200px;
+  background-color: #202020;
+  overflow-y: scroll;
+  z-index: 999;
+}
+body .exampleDiv::-webkit-scrollbar {
+  display: none;
+}
+body .exampleDiv ul li {
+  height: 40px;
+  line-height: 40px;
+  background-color: #333333;
+  border-bottom: 1px solid #747474;
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+}
+body .exampleDiv ul li:hover {
+  background-color: #4b4b4b;
+}
+body .exampleDiv ul li:hover .name {
+  letter-spacing: 4px;
+}
+body .exampleDiv ul li .name {
+  float: left;
+  font-size: 16px;
+  letter-spacing: 2px;
+  padding-left: 8px;
+  transition: 0.2s ease-in-out;
+  color: white;
+}
+body .exampleDiv ul li .author {
+  float: right;
+  font-size: 12px;
+  padding-right: 8px;
+  letter-spacing: 2px;
+  color: #c8c8c8;
 }

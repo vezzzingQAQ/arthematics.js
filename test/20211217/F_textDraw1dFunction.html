@@ -20,12 +20,14 @@
     <script src="../../arthematics.js"></script>
     <script>
         window.onload=function(){
-            createCanvas(document.body,0,0,width,height);
+            start(function(){
+                createCanvas(document.body,0,0,windowWidth,windowHeight);
+            });
             loop(function(){
                 noStroke();
                 background(rgba(0));
                 fill(rgba(255));
-                text("x="+map(my,0,height,-5,5),20,20);
+                text(`f(x)=sin(x*(${map(my,0,height,-5,5)})+(${map(mx,0,width,-5,5)})))`,20,20);
                 draw1dFunction({
                     sizex:700,
                     xl:-6,xr:6,deltaX:0.1,

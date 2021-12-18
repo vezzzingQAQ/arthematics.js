@@ -28,6 +28,7 @@ const HALF_PI=Math.PI/2;
 const RGB=1//默认状态
 const HSV_RGB=2//允许HSV转换
 var colorMode=HSV_RGB;
+
 /**
  * canvas全局变量
  */
@@ -43,6 +44,7 @@ var point;
 var rect;
 var rectCenter;
 var circle;
+var circleCenter;
 var line;
 var text;
 //上层数学函数
@@ -64,6 +66,7 @@ function _initFunctionValueE(){
     rect=function(x,y,width,height){arguments.length==3?canvasList[currentCanvasIndex].rect(x,y,width):canvasList[currentCanvasIndex].rect(x,y,width,height)};
     rectCenter=function(x,y,width,height){arguments.length==3?canvasList[currentCanvasIndex].rectCenter(x,y,width):canvasList[currentCanvasIndex].rectCenter(x,y,width,height)};
     circle=function(x,y,r){canvasList[currentCanvasIndex].circle(x,y,r)};
+    circleCenter=function(x,y,r){canvasList[currentCanvasIndex].circleCenter(x,y,r)};
     line=function(x1,y1,x2,y2){canvasList[currentCanvasIndex].line(x1,y1,x2,y2)};
     text=function(words,x,y){canvasList[currentCanvasIndex].text(words,x,y)};
 
@@ -318,6 +321,13 @@ class Canvas{//canvas画布类
         this.context.fill();
         this.context.stroke();
     }
+    circleCenter(x,y,r){//以中点圆-x,y,r
+        this.context.beginPath(); 
+        this.context.arc(x-r/2,y-r/2,r,0,Math.PI*2,false);
+        this.context.closePath();
+        this.context.fill();
+        this.context.stroke();
+    }
     background(color){//刷背景-传入Color类或Color函数
         var pfstyle=this.context.fillStyle;
         this.context.fillStyle=`rgba(${color.r},${color.g},${color.b},${color.a})`;
@@ -420,6 +430,44 @@ class Canvas{//canvas画布类
         this.canvas.parentNode.appendChild(tag);
     }
 }
+/*数学概念大类*/
+class Complex{//复数类
+    constructor(real,imaginary){
+        this.real=real;
+        this.imaginary=imaginary;
+    }
+    add(complex){//相加-另一个复数
+        this.real+=complex.real;
+        this.imaginary+=complex.imaginary;
+        return(this);
+    }
+    mult(complex){//相乘-另一个复数
+        this.real=this.real*complex.real-this.imaginary*complex.imaginary;
+        this.imaginary=this.imaginary*complex.real+this.real*complex.imaginary;
+        return(this);
+    }
+    div(complex){//相除-另一个复数
+        this.real=(this.real*complex.real+this.imaginary*complex.imaginary)/(complex.real*complex.real+complex.imaginary*complex.imaginary);
+        this.imaginary=(this.imaginary*complex.real-this.real*complex.imaginary)/(complex.real*complex.real+complex.imaginary*complex.imaginary);
+        return(this);
+    }
+    dist(complex){//两个复数点之间的距离-另一个复数
+        return(Math.sqrt((this.real-complex.real)*(this.real-complex.real)+(this.imaginary-complex.imaginary)*(this.imaginary-complex.imaginary)));
+    }
+    len(){//返回复数的模
+        return(Math.sqrt(this.real*this.real+this.imaginary*this.imaginary));
+    }
+    display(){//以点的形式绘制
+        point(this.real,this.imaginary);
+    }
+    log(){//打印输出
+        if(this.imaginary>=0){
+            return(this.real+"+"+this.imaginary+"i");
+        }else{
+            return(this.real+""+this.imaginary+"i");
+        }
+    }
+}
 /*数学绘图大类*/
 class Function2d{//二元函数类
     constructor(fromx,tox,padx,fromy,toy,pady,f){
@@ -464,6 +512,19 @@ class Rect{//数学矩形类,默认中心创建
     }
     log(){//打印输出
         return(`[x:${this.x},y:${this.y},width:${this.width},height:${this.height}]`);
+    }
+}
+class Circle{//数学圆类,默认中心创建
+    constructor(x,y,r){
+        this.r=r;
+        this.x=x-this.r/2;
+        this.y=y-this.r/2;
+    }
+    display(){//绘制圆
+        canvasList[currentCanvasIndex].circleCenter(this.x,this.y,this.r);
+    }
+    log(){//打印输出
+        return(`[x:${this.x},y:${this.y},r:${this.r}]`);
     }
 }
 /*颜色大类*/

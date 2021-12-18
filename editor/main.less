@@ -1,7 +1,17 @@
 @bg_body:black;
-@bg_codeDiv:rgba(41, 41, 41, 0.6);
+@bg_codeDiv:rgb(27, 27, 27);
+@bg_infoDiv:rgb(32, 32, 32);
+@bg_exampleDiv:rgb(32, 32, 32);
+@bg_exampleBottom:rgb(51, 51, 51);
+@hv_bg_exampleBottom:rgb(75, 75, 75);
+
+@fg_exampleName:white;
+@fg_exampleAuthor:rgb(200,200,200);
 
 @wd_codeDiv:40vw;
+
+@ht_infoDiv:100px;
+@ht_exampleDiv:200px;
 *{
     margin: 0;
     padding: 0;
@@ -13,15 +23,25 @@ body{
     overflow: hidden;
     position: relative;
     background-color: @bg_body;
-    .codeDiv{
+    .infoDiv{
         position: fixed;
         left: 0;
         top: 0;
+        height: @ht_infoDiv;
         width: @wd_codeDiv;
-        height: 100vh;
+        background-color: @bg_infoDiv;
+        z-index: 999;
+    }
+    .codeDiv{
+        position: fixed;
+        left: 0;
+        top: 100px;
+        width: @wd_codeDiv;
+        height: calc(100vh - @ht_infoDiv - @ht_exampleDiv);
         background-color: @bg_codeDiv;
         backdrop-filter: blur(2px);
         overflow: hidden;
+        z-index: 999;
         .codePlace{
             resize: none;
             width: @wd_codeDiv;
@@ -35,5 +55,50 @@ body{
         top: 0;
         width: calc(100vw - @wd_codeDiv);
         height: 100vh;
+        z-index: 999;
+    }
+    .exampleDiv{
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: @wd_codeDiv;
+        height: @ht_exampleDiv;
+        background-color: @bg_exampleDiv;
+        overflow-y: scroll;
+        z-index: 999;
+        &::-webkit-scrollbar{
+            display: none;
+        }
+        ul{
+            li{
+                height: 40px;
+                line-height: 40px;
+                background-color: @bg_exampleBottom;
+                border-bottom: 1px solid rgb(116, 116, 116);
+                transition: 0.2s ease-in-out;
+                cursor: pointer;
+                &:hover{
+                    background-color: @hv_bg_exampleBottom;
+                    .name{
+                        letter-spacing: 4px;
+                    }
+                }
+                .name{
+                    float: left;
+                    font-size: 16px;
+                    letter-spacing: 2px;
+                    padding-left: 8px;
+                    transition: 0.2s ease-in-out;
+                    color: @fg_exampleName;
+                }
+                .author{
+                    float: right;
+                    font-size: 12px;
+                    padding-right: 8px;
+                    letter-spacing: 2px;
+                    color: @fg_exampleAuthor;
+                }
+            }
+        }
     }
 }
